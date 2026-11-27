@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Invaders (1978)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: radial-gradient(ellipse at center, #1a0a3e 0%, #0d0520 50%, #000000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+            max-width: 1600px;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .game-section {
+            flex: 1;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff, #06ffa5);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(255, 0, 110, 0.5);
+            letter-spacing: 6px;
+            text-align: center;
+            font-weight: bold;
+            animation: glow 2s ease-in-out infinite alternate, gradient 3s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes glow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.3); }
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            color: #06ffa5;
+            letter-spacing: 3px;
+            text-align: center;
+            text-shadow: 0 0 10px #06ffa5;
+        }
+
+        .game-container {
+            position: relative;
+            background: linear-gradient(135deg, rgba(131, 56, 236, 0.1), rgba(58, 134, 255, 0.1));
+            border: 3px solid;
+            border-image: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff) 1;
+            border-radius: 15px;
+            box-shadow: 
+                0 0 40px rgba(131, 56, 236, 0.5),
+                inset 0 0 50px rgba(58, 134, 255, 0.1);
+            padding: 20px;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #0a0015 0%, #000000 100%);
+            border: 2px solid #8338ec;
+            box-shadow: 
+                0 0 30px rgba(131, 56, 236, 0.6),
+                inset 0 0 30px rgba(131, 56, 236, 0.2);
+            max-width: 100%;
+            width: 100%;
+            height: auto;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            border-radius: 5px;
+        }
+
+        @media (min-width: 769px) {
+            canvas {
+                width: 700px;
+                max-width: 700px;
+            }
+        }
+
+        .stats-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, rgba(131, 56, 236, 0.2), rgba(58, 134, 255, 0.2));
+            border-radius: 10px;
+            border: 2px solid;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(131, 56, 236, 0.4);
+        }
+
+        .stat-item:nth-child(1) {
+            border-color: #ff006e;
+        }
+
+        .stat-item:nth-child(2) {
+            border-color: #8338ec;
+        }
+
+        .stat-item:nth-child(3) {
+            border-color: #3a86ff;
+        }
+
+        .stat-item:nth-child(4) {
+            border-color: #06ffa5;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #06ffa5;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px #06ffa5;
+        }
+
+        .stat-value {
+            color: #fff;
+            text-shadow: 0 0 20px #8338ec;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-panel {
+            background: linear-gradient(135deg, rgba(131, 56, 236, 0.3), rgba(58, 134, 255, 0.2));
+            border: 2px solid #8338ec;
+            padding: 15px 20px;
+            border-radius: 10px;
+            min-width: 200px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(131, 56, 236, 0.3);
+            transition: all 0.3s;
+        }
+
+        .control-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(131, 56, 236, 0.5);
+        }
+
+        .control-panel h3 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: #06ffa5;
+            text-shadow: 0 0 10px #06ffa5;
+        }
+
+        .control-panel p {
+            font-size: 0.85rem;
+            margin: 5px 0;
+            opacity: 0.9;
+            color: #fff;
+        }
+
+        button {
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.3), rgba(131, 56, 236, 0.3));
+            color: #fff;
+            border: 2px solid #ff006e;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 0, 110, 0.3);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            box-shadow: 0 6px 25px rgba(255, 0, 110, 0.6);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .game-status {
+            font-size: 1.5rem;
+            margin: 15px 0;
+            min-height: 35px;
+            color: #06ffa5;
+            text-shadow: 0 0 20px #06ffa5;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .info-panel {
+            background: linear-gradient(135deg, rgba(26, 10, 62, 0.95), rgba(13, 5, 32, 0.95));
+            border: 2px solid #8338ec;
+            border-radius: 10px;
+            padding: 20px;
+            width: 350px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(131, 56, 236, 0.4);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .info-panel h2 {
+            color: #06ffa5;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 15px #06ffa5;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-section h3 {
+            color: #ff006e;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #8338ec;
+            padding-bottom: 5px;
+            text-shadow: 0 0 10px #ff006e;
+        }
+
+        .info-section p {
+            font-size: 0.85rem;
+            line-height: 1.6;
+            opacity: 0.95;
+            margin-bottom: 10px;
+            color: #e0e0e0;
+        }
+
+        .fun-fact {
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.15), rgba(131, 56, 236, 0.15));
+            border-left: 3px solid #06ffa5;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(6, 255, 165, 0.2);
+        }
+
+        .fun-fact strong {
+            color: #06ffa5;
+            text-shadow: 0 0 10px #06ffa5;
+        }
+
+        .game-over-overlay {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.95), rgba(131, 56, 236, 0.95));
+            padding: 40px;
+            border-radius: 20px;
+            border: 3px solid #ff006e;
+            text-align: center;
+            z-index: 100;
+            box-shadow: 0 0 60px rgba(255, 0, 110, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .game-over-overlay.show {
+            display: block;
+            animation: popIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .game-over-overlay h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 30px #fff;
+        }
+
+        .touch-hint {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 0.85rem;
+            color: #06ffa5;
+            opacity: 0.9;
+            text-shadow: 0 0 10px #06ffa5;
+        }
+
+        @media (min-width: 1400px) {
+            .game-section {
+                flex: 0 0 auto;
+            }
+            
+            .info-panel {
+                width: 400px;
+                max-height: 900px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .info-panel {
+                width: 100%;
+                max-width: 600px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 2rem;
+                letter-spacing: 3px;
+            }
+            .subtitle {
+                font-size: 0.7rem;
+                letter-spacing: 2px;
+            }
+            .stats-display {
+                font-size: 1rem;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            .stat-item {
+                padding: 6px 10px;
+            }
+            .stat-label {
+                font-size: 0.7rem;
+            }
+            .stat-value {
+                font-size: 1.2rem;
+            }
+            .game-status {
+                font-size: 1rem;
+            }
+            .control-panel {
+                min-width: 100%;
+                padding: 10px 15px;
+            }
+            .touch-hint {
+                display: block;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                width: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+                letter-spacing: 2px;
+            }
+            .subtitle {
+                font-size: 0.65rem;
+            }
+            .stats-display {
+                font-size: 0.9rem;
+                gap: 5px;
+            }
+            .stat-item {
+                padding: 5px 8px;
+            }
+            .stat-label {
+                font-size: 0.6rem;
+            }
+            .stat-value {
+                font-size: 1rem;
+            }
+            .game-over-overlay h2 {
+                font-size: 2rem;
+            }
+            .game-over-overlay p {
+                font-size: 1.2rem !important;
+            }
+        }
+
+        .info-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .info-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .info-panel::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #ff006e, #8338ec);
+            border-radius: 10px;
+        }
+
+        .info-panel::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #8338ec, #3a86ff);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="game-section">
+            <h1>SPACE INVADERS</h1>
+            <div class="subtitle">TAITO • 1978 • THE INVASION</div>
+            
+            <div class="game-status" id="gameStatus">¡Defiende la Tierra!</div>
+
+            <div class="game-container">
+                <canvas id="gameCanvas" width="700" height="800"></canvas>
+                <div id="gameOverOverlay" class="game-over-overlay">
+                    <h2 id="gameOverText">GAME OVER</h2>
+                    <p style="color: #fff; font-size: 1.5rem; margin: 20px 0; text-shadow: 0 0 10px #fff;" id="finalScore"></p>
+                    <button onclick="resetGame()" style="font-size: 1.2rem; padding: 15px 40px; border-color: #fff; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.4);">NUEVA PARTIDA</button>
+                </div>
+            </div>
+
+            <div class="stats-display">
+                <div class="stat-item">
+                    <div class="stat-label">PUNTUACIÓN</div>
+                    <div class="stat-value" id="scoreDisplay">0000</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">HI-SCORE</div>
+                    <div class="stat-value" id="hiScoreDisplay">0000</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">VIDAS</div>
+                    <div class="stat-value" id="livesDisplay">3</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">NIVEL</div>
+                    <div class="stat-value" id="levelDisplay">1</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-panel">
+                    <h3>🎮 CONTROLES</h3>
+                    <p><strong>←/→</strong> o <strong>A/D</strong> - Mover nave</p>
+                    <p><strong>ESPACIO</strong> - Disparar</p>
+                    <p><strong>P</strong> - Pausar</p>
+                </div>
+            </div>
+
+            <div class="touch-hint">
+                📱 Toca los lados para mover • Toca centro para disparar
+            </div>
+
+            <div style="text-align: center;">
+                <button id="startBtn">▶️ INICIAR JUEGO</button>
+                <button id="pauseBtn">⏸️ PAUSAR</button>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h2>👾 INVASIÓN HISTÓRICA</h2>
+            
+            <div class="info-section">
+                <h3>El Fenómeno (1978)</h3>
+                <p>Space Invaders fue creado por Tomohiro Nishikado para Taito. El juego fue tan popular en Japón que causó una escasez temporal de monedas de 100 yenes porque la gente las usaba todas en las máquinas arcade.</p>
+            </div>
+
+            <div class="fun-fact">
+                <strong>💴 Crisis de Monedas:</strong> El Banco de Japón tuvo que aumentar la producción de monedas de 100 yenes debido a la demanda masiva del juego. Se estima que generó más de $500 millones en su primer año.
+            </div>
+
+            <div class="info-section">
+                <h3>Innovaciones Técnicas</h3>
+                <p>Nishikado tuvo que diseñar su propio hardware porque las computadoras de la época no eran lo suficientemente rápidas. Usó chips de procesamiento de video y pasó un año desarrollando el juego solo.</p>
+            </div>
+
+            <div class="fun-fact">
+                <strong>🎨 Diseño de Enemigos:</strong> Originalmente los invasores iban a ser soldados humanos, pero Nishikado cambió a aliens por preocupaciones éticas. Los diseños se inspiraron en pulpos, calamares y cangrejos.
+            </div>
+
+            <div class="info-section">
+                <h3>La Aceleración "Accidental"</h3>
+                <p>La característica más emocionante del juego fue un "bug": cuando quedan menos invasores, el juego se acelera porque el procesador tiene menos sprites que calcular. Nishikado decidió mantenerlo porque aumentaba la tensión.</p>
+            </div>
+
+            <div class="fun-fact">
+                <strong>🚀 Primer Juego con Hi-Score:</strong> Space Invaders fue el primer juego en guardar la puntuación más alta, creando competencia entre jugadores y aumentando la rejugabilidad.
+            </div>
+
+            <div class="info-section">
+                <h3>Impacto Cultural</h3>
+                <p>Vendió más de 360,000 máquinas arcade en todo el mundo. En EE.UU., las ventas de arcade se triplicaron después de Space Invaders. Se considera el juego que estableció la industria moderna de videojuegos.</p>
+            </div>
+
+            <div class="fun-fact">
+                <strong>🎵 Soundtrack Icónico:</strong> El ritmo de cuatro notas que se acelera con el juego es una de las melodías más reconocibles de la historia. Fue diseñado para incrementar la ansiedad del jugador.
+            </div>
+
+            <div class="info-section">
+                <h3>Legado</h3>
+                <p>Estableció mecánicas que se volvieron estándar: oleadas de enemigos, power-ups, aumento de dificultad progresivo, y el concepto de "boss fights" (el UFO). Inspiró a generaciones de desarrolladores.</p>
+            </div>
+
+            <div class="fun-fact">
+                <strong>👾 Icono Pop:</strong> Los pixelados invasores se convirtieron en iconos culturales, apareciendo en camisetas, arte callejero, y películas. El diseño del alien medio es el símbolo universal de los videojuegos retro.
+            </div>
+
+            <div class="info-section">
+                <h3>Récords y Curiosidades</h3>
+                <p>• Generó más de $13 mil millones en ingresos (ajustados a inflación)<br>
+                • El récord mundial es de 55,160 puntos (versión original)<br>
+                • Fue el primer juego con easter egg oculto<br>
+                • Inspiró directamente a Pac-Man y Galaga</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Configurar el canvas para evitar borrosidad
+        ctx.imageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.mozImageSmoothingEnabled = false;
+        
+        // Audio Context
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Variables del juego
+        let score = 0;
+        let hiScore = parseInt(localStorage.getItem('spaceInvadersHiScore') || '0');
+        let lives = 3;
+        let level = 1;
+        let gameStarted = false;
+        let isPaused = false;
+        let gameOver = false;
+
+        // Arrays de entidades
+        let invaders = [];
+        let bullets = [];
+        let invaderBullets = [];
+        let shields = [];
+        let particles = [];
+        let ufo = null;
+
+        // Player
+        const player = {
+            x: canvas.width / 2 - 28,
+            y: canvas.height - 100,
+            width: 56,
+            height: 35,
+            speed: 7,
+            canShoot: true
+        };
+
+        // Configuración de invasores
+        const INVADER_ROWS = 5;
+        const INVADER_COLS = 11;
+        const INVADER_WIDTH = 38;
+        const INVADER_HEIGHT = 28;
+        const INVADER_PADDING = 18;
+        const INVADER_START_Y = 80;
+
+        let invaderDirection = 1;
+        let invaderSpeed = 1;
+        let invaderMoveTimer = 0;
+        let invaderMoveInterval = 60;
+        let invaderShootTimer = 0;
+
+        // Sonidos
+        function playSound(freq, duration, type = 'square') {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = type;
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playShootSound() {
+            playSound(800, 0.1);
+        }
+
+        function playHitSound() {
+            playSound(200, 0.15);
+        }
+
+        function playExplosionSound() {
+            playSound(100, 0.3, 'sawtooth');
+        }
+
+        // Partículas
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 1;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.color = color;
+                this.life = 1;
+                this.size = Math.random() * 3 + 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 0.02;
+            }
+
+            draw() {
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        // Invasores
+        class Invader {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 0: 10pts, 1: 20pts, 2: 30pts
+                this.width = INVADER_WIDTH;
+                this.height = INVADER_HEIGHT;
+                this.alive = true;
+                this.frame = 0;
+            }
+
+            draw() {
+                if (!this.alive) return;
+                
+                const colors = ['#ff006e', '#8338ec', '#3a86ff'];
+                ctx.fillStyle = colors[this.type];
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = colors[this.type];
+                
+                // Dibujar forma del invasor escalado 1.35x
+                if (this.type === 0) {
+                    // Tipo pulpo - Rosa magenta
+                    ctx.fillRect(this.x + 9, this.y, 19, 4);
+                    ctx.fillRect(this.x + 5, this.y + 4, 28, 14);
+                    ctx.fillRect(this.x, this.y + 18, 9, 10);
+                    ctx.fillRect(this.x + 14, this.y + 18, 9, 10);
+                    ctx.fillRect(this.x + 28, this.y + 18, 9, 10);
+                } else if (this.type === 1) {
+                    // Tipo calamar - Púrpura
+                    ctx.fillRect(this.x + 5, this.y, 28, 4);
+                    ctx.fillRect(this.x, this.y + 4, 38, 14);
+                    ctx.fillRect(this.x + 5, this.y + 18, 9, 10);
+                    ctx.fillRect(this.x + 24, this.y + 18, 9, 10);
+                } else {
+                    // Tipo cangrejo - Azul
+                    ctx.fillRect(this.x, this.y + 4, 38, 14);
+                    ctx.fillRect(this.x + 9, this.y, 19, 4);
+                    ctx.fillRect(this.x, this.y + 18, 14, 10);
+                    ctx.fillRect(this.x + 24, this.y + 18, 14, 10);
+                }
+                ctx.shadowBlur = 0;
+            }
+
+            getScore() {
+                return [10, 20, 30][this.type];
+            }
+        }
+
+        // Inicializar invasores
+        function createInvaders() {
+            invaders = [];
+            const startX = (canvas.width - (INVADER_COLS * (INVADER_WIDTH + INVADER_PADDING))) / 2;
+            
+            for (let row = 0; row < INVADER_ROWS; row++) {
+                for (let col = 0; col < INVADER_COLS; col++) {
+                    const type = row < 1 ? 2 : (row < 3 ? 1 : 0);
+                    const x = startX + col * (INVADER_WIDTH + INVADER_PADDING);
+                    const y = INVADER_START_Y + row * (INVADER_HEIGHT + INVADER_PADDING);
+                    invaders.push(new Invader(x, y, type));
+                }
+            }
+        }
+
+        // Escudos
+        class Shield {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 70;
+                this.height = 50;
+                this.blocks = [];
+                
+                // Crear bloques del escudo
+                for (let row = 0; row < 4; row++) {
+                    for (let col = 0; col < 7; col++) {
+                        if (row === 3 && (col === 2 || col === 3 || col === 4)) continue;
+                        this.blocks.push({
+                            x: this.x + col * 10,
+                            y: this.y + row * 12,
+                            alive: true
+                        });
+                    }
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = '#06ffa5';
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#06ffa5';
+                this.blocks.forEach(block => {
+                    if (block.alive) {
+                        ctx.fillRect(block.x, block.y, 10, 12);
+                    }
+                });
+                ctx.shadowBlur = 0;
+            }
+
+            checkCollision(x, y, width, height) {
+                for (let block of this.blocks) {
+                    if (block.alive &&
+                        x < block.x + 10 && x + width > block.x &&
+                        y < block.y + 12 && y + height > block.y) {
+                        block.alive = false;
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        // Crear escudos
+        function createShields() {
+            shields = [];
+            const totalWidth = canvas.width - 60;
+            const spacing = totalWidth / 4;
+            for (let i = 0; i < 4; i++) {
+                shields.push(new Shield(30 + spacing * i + (spacing - 70) / 2, canvas.height - 240));
+            }
+        }
+
+        // Bala del jugador
+        class Bullet {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 4;
+                this.height = 16;
+                this.speed = 10;
+                this.active = true;
+            }
+
+            update() {
+                this.y -= this.speed;
+                if (this.y < 0) this.active = false;
+
+                // Colisión con invasores
+                for (let invader of invaders) {
+                    if (invader.alive &&
+                        this.x < invader.x + invader.width && this.x + this.width > invader.x &&
+                        this.y < invader.y + invader.height && this.y + this.height > invader.y) {
+                        invader.alive = false;
+                        this.active = false;
+                        score += invader.getScore();
+                        updateScore();
+                        playHitSound();
+                        const explosionColors = ['#ff006e', '#8338ec', '#3a86ff'];
+                        createExplosion(invader.x + invader.width / 2, invader.y + invader.height / 2, explosionColors[invader.type]);
+                        
+                        // Acelerar cuando quedan menos invasores
+                        const aliveCount = invaders.filter(i => i.alive).length;
+                        invaderMoveInterval = Math.max(10, 60 - (55 - aliveCount));
+                        
+                        if (aliveCount === 0) {
+                            nextLevel();
+                        }
+                        break;
+                    }
+                }
+
+                // Colisión con UFO
+                if (ufo && ufo.active &&
+                    this.x < ufo.x + ufo.width && this.x + this.width > ufo.x &&
+                    this.y < ufo.y + ufo.height && this.y + this.height > ufo.y) {
+                    ufo.active = false;
+                    this.active = false;
+                    score += ufo.score;
+                    updateScore();
+                    playExplosionSound();
+                    createExplosion(ufo.x + ufo.width / 2, ufo.y, '#ffbe0b');
+                }
+
+                // Colisión con escudos
+                for (let shield of shields) {
+                    if (shield.checkCollision(this.x, this.y, this.width, this.height)) {
+                        this.active = false;
+                        break;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = '#06ffa5';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#06ffa5';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Bala de invasor
+        class InvaderBullet {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 4;
+                this.height = 16;
+                this.speed = 5;
+                this.active = true;
+            }
+
+            update() {
+                this.y += this.speed;
+                if (this.y > canvas.height) this.active = false;
+
+                // Colisión con jugador
+                if (this.x < player.x + player.width && this.x + this.width > player.x &&
+                    this.y < player.y + player.height && this.y + this.height > player.y) {
+                    this.active = false;
+                    lives--;
+                    updateLives();
+                    playExplosionSound();
+                    createExplosion(player.x + player.width / 2, player.y + player.height / 2, '#ff006e');
+                    
+                    if (lives <= 0) {
+                        endGame();
+                    }
+                }
+
+                // Colisión con escudos
+                for (let shield of shields) {
+                    if (shield.checkCollision(this.x, this.y, this.width, this.height)) {
+                        this.active = false;
+                        break;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = '#ff006e';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ff006e';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // UFO
+        class UFO {
+            constructor() {
+                this.x = -70;
+                this.y = 50;
+                this.width = 70;
+                this.height = 35;
+                this.speed = 2.5;
+                this.active = true;
+                this.score = [50, 100, 150, 300][Math.floor(Math.random() * 4)];
+            }
+
+            update() {
+                this.x += this.speed;
+                if (this.x > canvas.width) this.active = false;
+            }
+
+            draw() {
+                ctx.fillStyle = '#ffbe0b';
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#ffbe0b';
+                ctx.fillRect(this.x + 11, this.y + 11, 48, 11);
+                ctx.fillRect(this.x, this.y + 22, 70, 13);
+                
+                // Luces del UFO
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(this.x + 14, this.y + 25, 7, 7);
+                ctx.fillRect(this.x + 31, this.y + 25, 7, 7);
+                ctx.fillRect(this.x + 48, this.y + 25, 7, 7);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Control de teclado
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            initAudio();
+            
+            if (e.code === 'Space' && gameStarted && !isPaused && !gameOver) {
+                e.preventDefault();
+                if (player.canShoot && bullets.length === 0) {
+                    bullets.push(new Bullet(player.x + player.width / 2 - 2, player.y));
+                    playShootSound();
+                }
+            }
+            
+            if (e.code === 'KeyP') {
+                togglePause();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        // Controles táctiles
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            initAudio();
+            if (!gameStarted || isPaused || gameOver) return;
+            
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const touchX = touch.clientX - rect.left;
+            
+            // Disparar en el centro
+            if (touchX > canvas.width / 3 && touchX < canvas.width * 2 / 3) {
+                if (bullets.length === 0) {
+                    bullets.push(new Bullet(player.x + player.width / 2 - 2, player.y));
+                    playShootSound();
+                }
+            }
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!gameStarted || isPaused || gameOver) return;
+            
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const touchX = touch.clientX - rect.left;
+            
+            if (touchX < canvas.width / 3) {
+                player.x -= player.speed;
+            } else if (touchX > canvas.width * 2 / 3) {
+                player.x += player.speed;
+            }
+            
+            player.x = Math.max(0, Math.min(player.x, canvas.width - player.width));
+        });
+
+        // Actualizar puntuación
+        function updateScore() {
+            document.getElementById('scoreDisplay').textContent = String(score).padStart(4, '0');
+            if (score > hiScore) {
+                hiScore = score;
+                localStorage.setItem('spaceInvadersHiScore', hiScore);
+                document.getElementById('hiScoreDisplay').textContent = String(hiScore).padStart(4, '0');
+            }
+        }
+
+        function updateLives() {
+            document.getElementById('livesDisplay').textContent = lives;
+        }
+
+        function updateLevel() {
+            document.getElementById('levelDisplay').textContent = level;
+        }
+
+        // Siguiente nivel
+        function nextLevel() {
+            level++;
+            updateLevel();
+            invaderSpeed += 0.2;
+            createInvaders();
+            bullets = [];
+            invaderBullets = [];
+            document.getElementById('gameStatus').textContent = `¡Nivel ${level}!`;
+            setTimeout(() => {
+                document.getElementById('gameStatus').textContent = '¡Defiende la Tierra!';
+            }, 2000);
+        }
+
+        // Fin del juego
+        function endGame() {
+            gameOver = true;
+            gameStarted = false;
+            document.getElementById('gameOverText').textContent = 'GAME OVER';
+            document.getElementById('finalScore').textContent = `PUNTUACIÓN FINAL: ${score}`;
+            document.getElementById('gameOverOverlay').classList.add('show');
+        }
+
+        // Resetear juego
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            level = 1;
+            gameOver = false;
+            invaderSpeed = 1;
+            invaderMoveInterval = 60;
+            
+            updateScore();
+            updateLives();
+            updateLevel();
+            
+            createInvaders();
+            createShields();
+            bullets = [];
+            invaderBullets = [];
+            particles = [];
+            ufo = null;
+            
+            player.x = canvas.width / 2 - 28;
+            
+            document.getElementById('gameOverOverlay').classList.remove('show');
+            document.getElementById('gameStatus').textContent = '¡Defiende la Tierra!';
+        }
+
+        // Pausar
+        function togglePause() {
+            if (!gameStarted || gameOver) return;
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? '▶️ REANUDAR' : '⏸️ PAUSAR';
+            document.getElementById('gameStatus').textContent = isPaused ? '⏸️ PAUSA' : '¡Defiende la Tierra!';
+        }
+
+        // Game loop
+        function gameLoop() {
+            // Limpiar canvas con gradiente espacial
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#0a0015');
+            gradient.addColorStop(0.5, '#1a0a3e');
+            gradient.addColorStop(1, '#000000');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Estrellas de fondo
+            if (gameStarted) {
+                ctx.fillStyle = '#fff';
+                for (let i = 0; i < 50; i++) {
+                    const x = (i * 37) % canvas.width;
+                    const y = (i * 73) % canvas.height;
+                    const size = (i % 3) * 0.5 + 0.5;
+                    ctx.globalAlpha = 0.3 + (i % 5) * 0.1;
+                    ctx.fillRect(x, y, size, size);
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            if (!gameStarted || isPaused || gameOver) {
+                if (!gameStarted && !gameOver) {
+                    ctx.font = 'bold 32px Courier New';
+                    ctx.fillStyle = '#06ffa5';
+                    ctx.textAlign = 'center';
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#06ffa5';
+                    ctx.fillText('PRESIONA INICIAR', canvas.width / 2, canvas.height / 2);
+                    ctx.shadowBlur = 0;
+                }
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+
+            // Mover jugador
+            if (keys['ArrowLeft'] || keys['KeyA']) {
+                player.x -= player.speed;
+            }
+            if (keys['ArrowRight'] || keys['KeyD']) {
+                player.x += player.speed;
+            }
+            player.x = Math.max(0, Math.min(player.x, canvas.width - player.width));
+
+            // Dibujar jugador
+            ctx.fillStyle = '#06ffa5';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#06ffa5';
+            ctx.fillRect(player.x, player.y + 22, player.width, 13);
+            ctx.fillRect(player.x + 18, player.y, 20, 22);
+            
+            // Detalles del jugador
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(player.x + 24, player.y + 4, 8, 8);
+            ctx.shadowBlur = 0;
+
+            // Mover invasores
+            invaderMoveTimer++;
+            if (invaderMoveTimer >= invaderMoveInterval) {
+                invaderMoveTimer = 0;
+                
+                let shouldMoveDown = false;
+                for (let invader of invaders) {
+                    if (!invader.alive) continue;
+                    
+                    if ((invader.x <= 0 && invaderDirection === -1) ||
+                        (invader.x >= canvas.width - INVADER_WIDTH && invaderDirection === 1)) {
+                        shouldMoveDown = true;
+                        break;
+                    }
+                }
+                
+                if (shouldMoveDown) {
+                    invaderDirection *= -1;
+                    for (let invader of invaders) {
+                        if (invader.alive) {
+                            invader.y += INVADER_HEIGHT;
+                            
+                            // Game over si llegan abajo
+                            if (invader.y + invader.height > player.y) {
+                                endGame();
+                            }
+                        }
+                    }
+                } else {
+                    for (let invader of invaders) {
+                        if (invader.alive) {
+                            invader.x += (INVADER_WIDTH / 2) * invaderDirection * invaderSpeed;
+                        }
+                    }
+                }
+            }
+
+            // Dibujar invasores
+            invaders.forEach(invader => invader.draw());
+
+            // Disparos de invasores
+            invaderShootTimer++;
+            if (invaderShootTimer > 60) {
+                invaderShootTimer = 0;
+                const aliveInvaders = invaders.filter(i => i.alive);
+                if (aliveInvaders.length > 0) {
+                    const shooter = aliveInvaders[Math.floor(Math.random() * aliveInvaders.length)];
+                    invaderBullets.push(new InvaderBullet(shooter.x + shooter.width / 2, shooter.y + shooter.height));
+                }
+            }
+
+            // UFO
+            if (!ufo && Math.random() < 0.001) {
+                ufo = new UFO();
+            }
+            
+            if (ufo) {
+                if (ufo.active) {
+                    ufo.update();
+                    ufo.draw();
+                } else {
+                    ufo = null;
+                }
+            }
+
+            // Actualizar balas
+            bullets = bullets.filter(b => {
+                if (b.active) {
+                    b.update();
+                    b.draw();
+                }
+                return b.active;
+            });
+
+            invaderBullets = invaderBullets.filter(b => {
+                if (b.active) {
+                    b.update();
+                    b.draw();
+                }
+                return b.active;
+            });
+
+            // Dibujar escudos
+            shields.forEach(shield => shield.draw());
+
+            // Actualizar partículas
+            particles = particles.filter(p => {
+                p.update();
+                if (p.life > 0) {
+                    p.draw();
+                    return true;
+                }
+                return false;
+            });
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Botones
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (!gameStarted && !gameOver) {
+                gameStarted = true;
+                initAudio();
+                createInvaders();
+                createShields();
+                document.getElementById('gameStatus').textContent = '¡Defiende la Tierra!';
+            }
+        });
+
+        document.getElementById('pauseBtn').addEventListener('click', togglePause);
+
+        // Inicializar
+        document.getElementById('hiScoreDisplay').textContent = String(hiScore).padStart(4, '0');
+        updateScore();
+        updateLives();
+        updateLevel();
+
+        // Iniciar loop
+        gameLoop();
+    </script>
+</body>
+</html>

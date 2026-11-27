@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2307111f'/%3E%3Cpath d='M25 17 11 32l14 15M39 17l14 15-14 15' fill='none' stroke='%2342d9f5' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='32' r='3.5' fill='white'/%3E%3C/svg%3E">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="Prácticas guiadas de Python para 2.º de Bachillerato. Elige tu itinerario y aprende programando.">
+  <title>Aprende Python · 2.º Bachillerato</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --panel: rgba(15, 29, 49, .72);
+      --line: rgba(148, 183, 221, .17);
+      --text: #f4f8ff;
+      --muted: #a9b8cc;
+      --cyan: #42d9f5;
+      --blue: #568cff;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      font-family: "DM Sans", sans-serif; overflow-x: hidden;
+      background:
+        radial-gradient(ellipse at 50% -12%, rgba(42, 133, 206, .30), transparent 48%),
+        radial-gradient(ellipse at 4% 60%, rgba(37, 183, 205, .12), transparent 38%),
+        radial-gradient(ellipse at 96% 72%, rgba(100, 89, 210, .12), transparent 36%),
+        var(--bg);
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: .18;
+      background-image: linear-gradient(rgba(140,180,220,.055) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(140,180,220,.055) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, black, transparent 88%);
+    }
+    #particles {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      z-index: -1; pointer-events: none; opacity: .62;
+    }
+    .shell { width: min(1160px, calc(100% - 40px)); margin: auto; }
+    .hero { text-align: center; padding: clamp(48px, 8vw, 82px) 0 35px; }
+    h1 {
+      margin: 0 0 14px; font: 700 clamp(2.6rem, 7vw, 5.3rem)/.98 "Space Grotesk", sans-serif;
+      letter-spacing: -.065em;
+    }
+    h1 span {
+      color: transparent; background: linear-gradient(100deg, #fff 12%, #9deeff 53%, #8baeff 90%);
+      background-clip: text; -webkit-background-clip: text;
+    }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin: 30px 0 18px; }
+    .section-head h2 { margin: 0; font: 600 1.15rem "Space Grotesk", sans-serif; }
+    .section-head p { margin: 0; color: var(--muted); font-size: .85rem; }
+    .courses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 19px; padding-bottom: 72px; }
+    .course {
+      position: relative; min-width: 0; display: flex; flex-direction: column; overflow: hidden;
+      text-decoration: none; color: inherit; border-radius: 19px;
+      border: 1px solid var(--line); background: var(--panel);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.18);
+      transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease;
+      animation: rise .7s ease both;
+    }
+    .course:nth-child(2) { animation-delay: .12s; }
+    .course:nth-child(3) { animation-delay: .24s; }
+    .course:hover, .course:focus-visible {
+      transform: translateY(-8px); border-color: rgba(66,217,245,.55);
+      box-shadow: 0 24px 65px rgba(0,0,0,.32), 0 0 35px rgba(66,217,245,.10);
+      outline: none;
+    }
+    .image-wrap { position: relative; overflow: hidden; aspect-ratio: 16 / 10; background: #10243a; }
+    .image-wrap::after { content: ""; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, rgba(7,17,31,.55)); pointer-events: none; }
+    .image-wrap img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .65s cubic-bezier(.2,.7,.2,1); }
+    .course:hover img { transform: scale(1.045); }
+    .number {
+      position: absolute; z-index: 1; top: 13px; left: 13px; width: 31px; height: 31px;
+      display: grid; place-items: center; border-radius: 10px; color: #061321;
+      background: rgba(238,249,255,.94); font: 700 .85rem "Space Grotesk", sans-serif;
+    }
+    .course-body { display: flex; flex: 1; flex-direction: column; padding: 19px 19px 18px; }
+    .category { color: var(--cyan); font-size: .68rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+    .course h3 { margin: 8px 0 9px; font: 600 1.2rem/1.25 "Space Grotesk", sans-serif; letter-spacing: -.025em; }
+    .course p { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.55; }
+    .action { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--line); color: #e8f7ff; font-size: .84rem; font-weight: 700; }
+    .arrow { width: 29px; height: 29px; display: grid; place-items: center; border-radius: 50%; color: var(--cyan); background: rgba(66,217,245,.11); transition: transform .25s ease, background .25s ease; }
+    .course:hover .arrow { transform: translateX(4px); background: rgba(66,217,245,.2); }
+    footer { display: flex; justify-content: space-between; gap: 16px; padding: 18px 0 28px; border-top: 1px solid var(--line); color: #7f91a8; font-size: .78rem; }
+    footer span:last-child { text-align: right; }
+    @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 850px) {
+      .courses { grid-template-columns: repeat(2, 1fr); }
+      .course:last-child { grid-column: 1 / -1; max-width: calc(50% - 10px); width: 100%; justify-self: center; }
+    }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 28px, 440px); }
+      .hero { padding: 54px 0 28px; }
+      .section-head { display: block; margin-top: 22px; }
+      .section-head p { margin-top: 6px; }
+      .courses { grid-template-columns: 1fr; gap: 14px; padding-bottom: 48px; }
+      .course:last-child { grid-column: auto; max-width: none; }
+      .image-wrap { aspect-ratio: 16 / 9; }
+      .course-body { padding: 17px; }
+      footer { flex-direction: column; gap: 7px; } footer span:last-child { text-align: left; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      #particles { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particles" aria-hidden="true"></canvas>
+  <div class="shell">
+    <main>
+      <section class="hero">
+        <h1><span>Aprende Python</span><br>programando</h1>
+      </section>
+
+      <section aria-labelledby="elige">
+        <div class="section-head">
+          <h2 id="elige">Selecciona tu itinerario</h2>
+          <p>Haz clic en una tarjeta para comenzar</p>
+        </div>
+        <div class="courses">
+          <a class="course" href="https://frmoisesfr.github.io/cursos/python.html" target="_blank" rel="noopener noreferrer" aria-label="Abrir Reconocimiento Facial con Python">
+            <div class="image-wrap">
+              <span class="number">01</span>
+              <img src="assets/reconocimiento-facial.jpg" alt="Laboratorio tecnológico con inteligencia artificial y reconocimiento facial" fetchpriority="high">
+            </div>
+            <div class="course-body">
+              <span class="category">Visión artificial · IA</span>
+              <h3>Reconocimiento Facial con Python</h3>
+              <p>Explora la visión artificial y descubre cómo un programa puede detectar y reconocer rostros.</p>
+              <div class="action"><span>Acceder al curso</span><span class="arrow" aria-hidden="true">→</span></div>
+            </div>
+          </a>
+
+          <a class="course" href="https://colab.research.google.com/github/frmoisesfr/cursos/blob/main/notebooks/2.%20Classical_Lab_Python_Latin_Griego_2Bach_8_sesiones_secuencia_guiada.ipynb" target="_blank" rel="noopener noreferrer" aria-label="Abrir Python para Latín II y Griego II en Google Colab">
+            <div class="image-wrap">
+              <span class="number">02</span>
+              <img src="assets/classical-lab.png" alt="Portada Classical Lab: Python para Latín II y Griego II" loading="lazy">
+            </div>
+            <div class="course-body">
+              <span class="category">Humanidades · Lenguas clásicas</span>
+              <h3>Python para Latín II y Griego II</h3>
+              <p>Utiliza Python para explorar palabras, vocabulario y contenidos de las lenguas clásicas.</p>
+              <div class="action"><span>Abrir práctica en Google Colab</span><span class="arrow" aria-hidden="true">↗</span></div>
+            </div>
+          </a>
+
+          <a class="course" href="https://colab.research.google.com/github/frmoisesfr/cursos/blob/main/notebooks/3.%20MathLab_Python_Matematicas_2Bach_8_sesiones.ipynb" target="_blank" rel="noopener noreferrer" aria-label="Abrir Python para Matemáticas II en Google Colab">
+            <div class="image-wrap">
+              <span class="number">03</span>
+              <img src="assets/mathlab.png" alt="Portada MathLab: Python para Matemáticas II" loading="lazy">
+            </div>
+            <div class="course-body">
+              <span class="category">Ciencia · Matemáticas</span>
+              <h3>Python para Matemáticas II</h3>
+              <p>Resuelve y visualiza problemas de matrices, sistemas, límites y derivadas con código.</p>
+              <div class="action"><span>Abrir práctica en Google Colab</span><span class="arrow" aria-hidden="true">↗</span></div>
+            </div>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Prácticas guiadas de programación · 2.º Bachillerato</span>
+      <span>Aprender haciendo. Crear comprendiendo.</span>
+    </footer>
+  </div>
+
+  <script>
+    // Partículas discretas: movimiento lento, conexiones solo entre puntos cercanos.
+    (() => {
+      const canvas = document.getElementById("particles");
+      const ctx = canvas.getContext("2d");
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduceMotion || !ctx) return;
+
+      let width = 0, height = 0, particles = [], frame = 0;
+      const spacing = 105;
+
+      function resize() {
+        const ratio = Math.min(window.devicePixelRatio || 1, 1.6);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.floor(width * ratio);
+        canvas.height = Math.floor(height * ratio);
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        const count = Math.min(58, Math.max(24, Math.floor(width * height / 22000)));
+        particles = Array.from({ length: count }, () => ({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - .5) * .18,
+          vy: (Math.random() - .5) * .18,
+          r: Math.random() * 1.5 + .6,
+          phase: Math.random() * Math.PI * 2
+        }));
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+        frame += .008;
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < -10) p.x = width + 10;
+          if (p.x > width + 10) p.x = -10;
+          if (p.y < -10) p.y = height + 10;
+          if (p.y > height + 10) p.y = -10;
+
+          const glow = .35 + (Math.sin(frame + p.phase) + 1) * .18;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(105, 215, 245, ${glow})`;
+          ctx.fill();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const q = particles[j];
+            const dx = p.x - q.x, dy = p.y - q.y;
+            const distance = Math.hypot(dx, dy);
+            if (distance < spacing) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(q.x, q.y);
+              ctx.strokeStyle = `rgba(94, 174, 225, ${(1 - distance / spacing) * .12})`;
+              ctx.lineWidth = .7;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+
+      let resizeTimer;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(resize, 120);
+      }, { passive: true });
+      resize();
+      draw();
+    })();
+  </script>
+</body>
+</html>
